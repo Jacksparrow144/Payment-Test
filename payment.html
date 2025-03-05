@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aorbo Treks - Payment</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <link rel="stylesheet" href="styles.css">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        .container {
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Book Your Trek</h2>
+        <h3 id="trek-name">Loading...</h3>
+        <p id="trek-price">Price: ₹0</p>
+        
+        <input type="text" id="name" placeholder="Enter your name">
+        <input type="email" id="email" placeholder="Enter your email">
+        <input type="tel" id="phone" placeholder="Enter your phone number">
+        <button onclick="makePayment()">Proceed to Pay</button>
+    </div>
+
+    <script>
+        // Extract trek details from URL
+        function getQueryParams() {
+            let params = new URLSearchParams(window.location.search);
+            return {
+                trek: params.get("trek") || "Unknown Trek",
+                price: params.get("price") || "0"
+            };
+        }
+
+        // Update UI with trek details
+        let trekDetails = getQueryParams();
+        document.getElementById("trek-name").innerText = trekDetails.trek;
+        document.getElementById("trek-price").innerText = "Price: ₹" + trekDetails.price;
+
+        function makePayment() {
+            let name = document.getElementById('name').value;
+            let email = document.getElementById('email').value;
+            let phone = document.getElementById('phone').value;
+            let amount = trekDetails.price * 100; // Convert to paisa
+
+            if (!name || !email || !phone) {
+                alert("Please fill in all details");
+                return;
+            }
+
+            let options = {
+                "key": "rzp_test_gRrWeTs2n9xIRg", // Replace with your test API key
+                "amount": amount,
+                "currency": "INR",
+                "name": "Aorbo Treks",
+                "description": trekDetails.trek + " Booking Payment",
+                "handler": function (response) {
+                    alert("Payment Successful! Payment ID: " + response.razorpay_payment_id);
+                },
+                "prefill": {
+                    "name": name,
+                    "email": email,
+                    "contact": phone
+                },
+                "theme": {
+                    "color": "#28a745"
+                }
+            };
+
+            let rzp = new Razorpay(options);
+            rzp.open();
+        }
+    </script>
+</body>
+</html>
